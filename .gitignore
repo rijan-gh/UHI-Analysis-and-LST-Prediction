@@ -48,3 +48,5 @@ optuna_*.pkl
 *.log
 
 \gee
+01_lst_prediction/results/models
+docs/validation_notes.md

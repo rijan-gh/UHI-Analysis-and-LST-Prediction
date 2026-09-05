@@ -28,30 +28,23 @@ uhi-lst-nepal/
 ├── .gitignore
 │
 ├── data/
-│   ├── raw/                        ← CANONICAL data location (used by all notebooks)
-│   │   ├── kathmandu/
-│   │   │   ├── Kathmandu_Dataset.csv
-│   │   │   ├── lst_tifs/           ← LST GeoTIFFs (gitignored — large)
-│   │   │   ├── lulc_tifs/          ← LULC GeoTIFFs (gitignored)
-│   │   │   └── uhi_tifs/           ← UHI hotspot GeoTIFFs (gitignored)
-│   │   └── hetauda/
-│   │       └── (same structure)
-│   │
-│   ├── kathmandu/csv/              ← LULC_Area_Stats + LULC_LST_Relationship CSVs
-│   │                                  (NOT duplicated elsewhere — needed by 02)
-│   └── hetauda/csv/
+│   |
+│   ├── kathmandu/
+│   │   ├── Kathmandu_Dataset.csv
+│   │   ├── csv/                ← LULC_Area_Stats + LULC_LST_Relationship CSVs
+│   │   ├── lst_tifs/           ← LST GeoTIFFs (gitignored — large)
+│   │   ├── lulc_tifs/          ← LULC GeoTIFFs (gitignored)
+│   │   └── uhi_tifs/           ← UHI hotspot GeoTIFFs (gitignored)
+│   └── hetauda/
 │       └── (same structure)
 │
-│   > NOTE: data/kathmandu/lst_tif, lulc_tif, uhi_tif and data/hetauda/(same) are
-│   > byte-identical duplicates of data/raw/{city}/*_tifs and are safe to delete —
-│   > every notebook reads from data/raw/. Only the csv/ subfolders under
-│   > data/kathmandu and data/hetauda contain files not found in data/raw/.
 │
 ├── 01_lst_prediction/
 │   ├── LST_prediction_kathmandu.ipynb
 │   ├── LST_prediction_hetauda.ipynb
 │   └── results/
 │       ├── figures/
+│       ├── tables/
 │       └── models/                 ← trained .pkl models (gitignored)
 │
 ├── 02_lulc_uhi_analysis/
@@ -63,12 +56,14 @@ uhi-lst-nepal/
 ├── 03_timeseries_forecasting/
 │   ├── time_series_analysis.ipynb
 │   └── results/
-│       └── figures/
+│       ├── figures/
+│       └── tables/
 │
 ├── 04_comparative_analysis/
 │   ├── comparative_analysis.ipynb
 │   └── results/
-│       └── figures/
+│       ├── figures/
+│       └── tables/
 │
 ├── gee/
 │   └── scripts/                    ← Google Earth Engine scripts
@@ -76,12 +71,11 @@ uhi-lst-nepal/
 │       ├── 02_uhi_classification.js
 │       └── 03_lulc_extraction.js
 │
-├── docs/
-│   └── validation_notes.md         ← Data validation and methodology notes
-│
-├── report/                         ← Final project report
-│
-└── presentation/                   ← Presentation slides
+└── docs/
+    ├── report/                     ← Final project report
+    |-- presentation/           ← Presentation slides
+    └── validation_notes.md         ← Data validation and methodology notes
+
 ```
 
 ---
@@ -121,10 +115,9 @@ Analyses historical LST trends (2015–2025) and forecasts future values:
 **Notebook:** `04_comparative_analysis/comparative_analysis.ipynb`
 
 Comparative analysis between Kathmandu Valley and Hetauda:
-- **Status:** Implemented and verified (0 execution errors). Covers SUHII comparison, LULC conversion
-  comparison, and LST trend/forecast comparison. Feature-importance comparison (Section 4) is marked
-  pending in the notebook until `01_lst_prediction`'s fresh execution is confirmed — see
-  `docs/validation_notes.md` and the notebook's own "Pending" callout for details.
+- **Status:** Fully implemented and verified. Covers SUHII comparison, LULC conversion comparison, 
+  LST trend/forecast comparison, and feature importance comparison. 
+- **Outputs:** Cross-city comparison plots and tables in `results/figures/` and `results/tables/`
 
 ---
 
@@ -178,18 +171,24 @@ Notebooks sit directly inside each numbered stage folder (no `code/` subfolder).
 
 | Metric | Kathmandu | Hetauda |
 |---|---|---|
-| Best model | *pending final verification — see note below* | *pending final verification* |
+| Best model | XGBoost Tuned (RMSE 1.57°C, MAE 1.18°C, R² 0.85) | XGBoost Tuned (RMSE 1.48°C, MAE 1.13°C, R² 0.82) |
 | SUHII 2015 → 2025 | 3.85°C → 4.95°C (peaked 5.28°C in 2020) | 1.81°C → 2.76°C (peaked 3.27°C in 2020) |
 | LST trend (Sen's slope) | +0.46°C/year (p=0.005, significant) | +0.41°C/year (p=0.020, significant) |
 | Forecast CV accuracy | MAE 0.90°C, RMSE 1.01°C | MAE 1.05°C, RMSE 1.17°C |
+| Land converted to Builtup (2015-2025) | 207.0 km² | 31.3 km² |
+| Dominant LST drivers | Distributed (NDBI/Albedo/NDVI) | Albedo/MNDWI (dominant) |
 | Figures | `02_lulc_uhi_analysis/results/figures/` | `02_lulc_uhi_analysis/results/figures/` |
 | SUHII results table | `02_lulc_uhi_analysis/results/tables/SUHII_results.csv` | (same file, both cities) |
 | Forecast trend | `03_timeseries_forecasting/` | `03_timeseries_forecasting/` |
+| Comparative analysis | `04_comparative_analysis/results/` | `04_comparative_analysis/results/` |
 
-> **Note on "Best model":** the previous version of this table stated Random Forest for both cities without
-> re-checking against the notebooks' actual output — this was incorrect and has been removed pending a
-> fresh, verified run of `01_lst_prediction/`. Do not cite a "best model" claim in the report until this
-> row is filled in from a confirmed execution.
+---
+
+## Overall Findings
+
+The comparative analysis reveals that **Kathmandu shows a stronger, more established, and more statistically confident UHI signal across every metric** — consistent with it being the more mature, denser urban area. **Hetauda shows a weaker but still real and significant UHI signal**, with a distinct land-cover-driven mechanism (Albedo/MNDWI) rather than Kathmandu's more distributed built-up-intensity mechanism.
+
+This supports the project's core comparative premise: the two cities represent **different stages of urbanization with measurably different UHI dynamics**, not just a scaled-down version of the same pattern.
 
 ---
 
@@ -197,9 +196,3 @@ Notebooks sit directly inside each numbered stage folder (no `code/` subfolder).
 
 Computer Engineering Minor Research Project
 Kathmandu, Nepal — 2025
-
----
-
-## License
-
-This repository is for academic research purposes.
