@@ -1,0 +1,33 @@
+# ─── Urban Heat Island Analysis — Python Dependencies ────────────────────────
+# Generated for Python 3.10+
+# Install with:  pip install -r requirements.txt
+
+# Core scientific stack
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+
+# Machine learning 
+scikit-learn>=1.3
+xgboost>=1.7
+optuna>=3.3
+joblib>=1.2
+
+# Explainability 
+shap>=0.42
+
+# Geospatial 
+rasterio>=1.3
+
+# Time-series statistics
+pymannkendall>=1.4
+statsmodels>=0.14
+
+# Visualisation
+matplotlib>=3.7
+seaborn>=0.12
+
+# Notebooks
+jupyter>=1.0
+ipykernel>=6.0
+nbformat>=5.7
